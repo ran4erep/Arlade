@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import MainMenu from './components/MainMenu';
 import Game from './components/Game';
+import OrientationLock from './components/OrientationLock';
 import { generateDungeon } from './hooks/useDungeonGenerator';
 import { DungeonData } from './types';
 
@@ -31,6 +32,25 @@ const App: React.FC = () => {
   const [gameId, setGameId] = useState(1);
   const [dungeonData, setDungeonData] = useState<DungeonData | null>(null);
   const [loadingProgress, setLoadingProgress] = useState({ progress: 0, message: '' });
+
+  const [isTouchDevice] = useState('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const [isPortrait, setIsPortrait] = useState(isTouchDevice ? window.matchMedia("(orientation: portrait)").matches : false);
+
+  useEffect(() => {
+    if (!isTouchDevice) return;
+
+    const mediaQuery = window.matchMedia("(orientation: portrait)");
+    const handleChange = (e: MediaQueryListEvent) => setIsPortrait(e.matches);
+    
+    mediaQuery.addEventListener('change', handleChange);
+    
+    // Initial check
+    setIsPortrait(mediaQuery.matches);
+
+    return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [isTouchDevice]);
 
   const startGame = useCallback(async () => {
     setGameState('loading');
@@ -70,19 +90,19 @@ const App: React.FC = () => {
         return <Game key={gameId} onGameOver={endGame} dungeonData={dungeonData} />;
       case 'gameOver':
         return (
-          <div className="flex flex-col items-center justify-center h-full text-white text-center">
-            <h1 className="text-5xl font-bold mb-4 text-red-500 leading-relaxed">Игра окончена</h1>
-            <p className="text-lg mb-8">Вы были повержены.</p>
+          <div className="flex flex-col items-center justify-center h-full text-white text-center p-4">
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 text-red-500 leading-relaxed">Игра окончена</h1>
+            <p className="text-base md:text-lg mb-8">Вы были повержены.</p>
             <div className="space-x-4">
               <button
                 onClick={restartGame}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-lg font-semibold transition-transform transform hover:scale-105"
+                className="px-6 py-3 md:px-8 md:py-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-base md:text-lg font-semibold transition-transform transform hover:scale-105"
               >
                 Попробовать снова
               </button>
               <button
                 onClick={backToMenu}
-                className="px-8 py-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-lg font-semibold transition-transform transform hover:scale-105"
+                className="px-6 py-3 md:px-8 md:py-4 bg-gray-700 hover:bg-gray-600 rounded-lg text-base md:text-lg font-semibold transition-transform transform hover:scale-105"
               >
                 Главное меню
               </button>
@@ -97,9 +117,13 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-gray-900 h-screen w-screen flex flex-col">
-       <div className="flex-grow min-h-0">
-         {renderContent()}
-       </div>
+       {isTouchDevice && isPortrait ? (
+         <OrientationLock />
+       ) : (
+         <div className="flex-grow min-h-0">
+           {renderContent()}
+         </div>
+       )}
     </div>
   );
 };

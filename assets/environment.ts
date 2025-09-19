@@ -1,4 +1,4 @@
-export const FLOOR_TILE_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAUElEQVR4AeySsQoAIAhEj36rqS9v8rtKBRtc4mhpELoo8Z2gNgDrRWagPDB6p+SQXm5gsL6pE4wbUGRKLgOgevBND6ZIWtD7N5gzRgswihIbAAD//whCJVcAAAAGSURBVAMAuZg6EWoBfb0AAAAASUVORK5CYIIA';
+export const FLOOR_TILE_BASE64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAVElEQVR4AeySMQoAIAhFPx0kaOn+52kJukipYENLfFoahH6U+L6gJgDzRWogPFBypWSQXGagsLyp44wZUOSRHAZA9OCbHvTRjgW9f53ZY9QAIy+xAAAA///hF5gGAAAABklEQVQDABs3OhFfR7ZuAAAAAElFTkSuQmCC';
 
 // 16-tile wall tileset for autotiling.
 // The index is a bitmask calculated from the four cardinal neighbors:

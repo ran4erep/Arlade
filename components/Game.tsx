@@ -7,7 +7,7 @@ import StatusBar from './StatusBar';
 import LogPanel from './LogPanel';
 import DebugMenu from './DebugMenu';
 import { Player, Enemy, Position, TileType, Visibility, DungeonData, Viewport, EnemyState, DebugOptions } from '../types';
-import { MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, PLAYER_INITIAL_HEALTH, PLAYER_ATTACK_POWER, PLAYER_VISION_RADIUS, ENEMY_VISION_RADIUS, ENEMY_PATROL_RADIUS } from '../constants';
+import { MAP_WIDTH, MAP_HEIGHT, PC_TILE_SIZE, MOBILE_TILE_SIZE, PLAYER_INITIAL_HEALTH, PLAYER_ATTACK_POWER, PLAYER_VISION_RADIUS, ENEMY_VISION_RADIUS, ENEMY_PATROL_RADIUS } from '../constants';
 import { computeFov } from '../utils/fov';
 import { findPath } from '../utils/pathfinding';
 import { hasLineOfSight } from '../utils/los';
@@ -34,7 +34,13 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
   const { map, playerStart, enemiesStart } = dungeonData;
   const [player, setPlayer] = useState<Player>({ pos: playerStart, health: PLAYER_INITIAL_HEALTH });
   const [enemies, setEnemies] = useState<Enemy[]>(enemiesStart);
-  const [log, setLog] = useState(['Добро пожаловать! Используйте стрелки/WASD для движения и QEZX для диагоналей.']);
+  
+  const [isTouchDevice] = useState('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const initialLogMessage = isTouchDevice
+    ? 'Добро пожаловать! Используйте свайпы для передвижения.'
+    : 'Добро пожаловать! Используйте стрелки/WASD для движения и QEZX для диагоналей.';
+  const [log, setLog] = useState([initialLogMessage]);
+  
   const [visibilityMap, setVisibilityMap] = useState<Visibility[][]>(() => 
     Array(MAP_HEIGHT).fill(null).map(() => Array(MAP_WIDTH).fill(Visibility.HIDDEN))
   );
@@ -50,16 +56,11 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
   const [enemyVisionTiles, setEnemyVisionTiles] = useState<Set<string>>(new Set());
   const [turnCount, setTurnCount] = useState(1);
   const [touchStart, setTouchStart] = useState<{ x: number, y: number } | null>(null);
-  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [tileSize, setTileSize] = useState(window.innerWidth < 768 ? MOBILE_TILE_SIZE : PC_TILE_SIZE);
 
   const gameAction = useGameInput();
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    setIsTouchDevice(hasTouch);
-  }, []);
 
   const handleDebugOptionChange = useCallback(<K extends keyof DebugOptions>(option: K, value: DebugOptions[K]) => {
       setDebugOptions(prev => ({ ...prev, [option]: value }));
@@ -293,17 +294,18 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
   }, [player.health, onGameOver]);
 
   useEffect(() => {
-    const updateSize = () => {
+    const handleResize = () => {
         if (gameAreaRef.current) {
             setViewportSize({
                 width: gameAreaRef.current.clientWidth,
                 height: gameAreaRef.current.clientHeight,
             });
         }
+        setTileSize(window.innerWidth < 768 ? MOBILE_TILE_SIZE : PC_TILE_SIZE);
     };
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const handleTouchStart = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
@@ -355,8 +357,8 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
     setTouchStart(null);
   }, [touchStart, player.pos, processTurn]);
 
-  const viewportX = viewportSize.width > 0 ? Math.max(0, Math.min(player.pos.x * TILE_SIZE - viewportSize.width / 2, MAP_WIDTH * TILE_SIZE - viewportSize.width)) : 0;
-  const viewportY = viewportSize.height > 0 ? Math.max(0, Math.min(player.pos.y * TILE_SIZE - viewportSize.height / 2, MAP_HEIGHT * TILE_SIZE - viewportSize.height)) : 0;
+  const viewportX = viewportSize.width > 0 ? Math.max(0, Math.min(player.pos.x * tileSize - viewportSize.width / 2, MAP_WIDTH * tileSize - viewportSize.width)) : 0;
+  const viewportY = viewportSize.height > 0 ? Math.max(0, Math.min(player.pos.y * tileSize - viewportSize.height / 2, MAP_HEIGHT * tileSize - viewportSize.height)) : 0;
 
   const viewport: Viewport = {
     x: viewportX,
@@ -365,7 +367,7 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
     height: viewportSize.height,
   };
 
-  const playerScreenX = player.pos.x * TILE_SIZE - viewport.x;
+  const playerScreenX = player.pos.x * tileSize - viewport.x;
   // Move buttons to the left if the player is in the rightmost 25% of the viewport.
   const areButtonsOnLeft = viewport.width > 0 && playerScreenX > viewport.width * 0.75;
 
@@ -376,7 +378,7 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
         <main className="flex flex-row flex-grow overflow-hidden min-h-0">
             <div 
               ref={gameAreaRef} 
-              className="flex-grow h-full relative overflow-hidden bg-black touch-none"
+              className="flex-grow relative overflow-hidden bg-black"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               style={{ touchAction: 'none' }}
@@ -401,8 +403,8 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
                 )}
 
                 <div className="absolute transition-transform duration-200 ease-in-out" style={{ transform: `translate(${-Math.round(viewportX)}px, ${-Math.round(viewportY)}px)` }}>
-                    <GameBoard map={map} visibilityMap={visibilityMap} viewport={viewport} debugOptions={debugOptions} enemyVisionTiles={enemyVisionTiles} enemies={enemies} />
-                    <PlayerComponent pos={player.pos} />
+                    <GameBoard map={map} visibilityMap={visibilityMap} viewport={viewport} debugOptions={debugOptions} enemyVisionTiles={enemyVisionTiles} enemies={enemies} tileSize={tileSize} />
+                    <PlayerComponent pos={player.pos} tileSize={tileSize} />
                     {enemies.filter(enemy => {
                         if (debugOptions.revealMap) {
                             return true;
@@ -419,11 +421,11 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
                         }
                         return hasLineOfSight(player.pos, enemy.pos, map);
                     }).map(enemy => (
-                        <EnemyComponent key={enemy.id} enemy={enemy} debugOptions={debugOptions} />
+                        <EnemyComponent key={enemy.id} enemy={enemy} debugOptions={debugOptions} tileSize={tileSize} />
                     ))}
                 </div>
             </div>
-            <aside className="w-96 flex-shrink-0 h-full bg-gray-800 border-l-2 border-gray-600">
+            <aside className="w-40 md:w-96 h-full flex-shrink-0 bg-gray-800 border-l-2 border-gray-600">
                 <LogPanel messages={log} />
             </aside>
         </main>

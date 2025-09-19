@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { TileType, Visibility, Viewport, DebugOptions, Enemy } from '../types';
-import { TILE_SIZE, MAP_WIDTH, MAP_HEIGHT } from '../constants';
+import { MAP_WIDTH, MAP_HEIGHT } from '../constants';
 import { WALL_TILES_BASE64, FLOOR_TILE_BASE64 } from '../assets/environment';
 
 interface GameBoardProps {
@@ -10,6 +10,7 @@ interface GameBoardProps {
   debugOptions: DebugOptions;
   enemyVisionTiles: Set<string>;
   enemies: Enemy[];
+  tileSize: number;
 }
 
 // Memoize image objects outside the component to ensure they are created only once.
@@ -21,7 +22,7 @@ const wallTileImages = WALL_TILES_BASE64.map(src => {
     return img;
 });
 
-const GameBoard: React.FC<GameBoardProps> = ({ map, visibilityMap, viewport, debugOptions, enemies, enemyVisionTiles }) => {
+const GameBoard: React.FC<GameBoardProps> = ({ map, visibilityMap, viewport, debugOptions, enemies, enemyVisionTiles, tileSize }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // We need to redraw when images are loaded, use a state for that.
@@ -69,10 +70,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ map, visibilityMap, viewport, deb
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Calculate the visible tile range based on the viewport
-    const startX = Math.max(0, Math.floor(viewport.x / TILE_SIZE));
-    const startY = Math.max(0, Math.floor(viewport.y / TILE_SIZE));
-    const endX = Math.min(MAP_WIDTH, Math.ceil((viewport.x + viewport.width) / TILE_SIZE));
-    const endY = Math.min(MAP_HEIGHT, Math.ceil((viewport.y + viewport.height) / TILE_SIZE));
+    const startX = Math.max(0, Math.floor(viewport.x / tileSize));
+    const startY = Math.max(0, Math.floor(viewport.y / tileSize));
+    const endX = Math.min(MAP_WIDTH, Math.ceil((viewport.x + viewport.width) / tileSize));
+    const endY = Math.min(MAP_HEIGHT, Math.ceil((viewport.y + viewport.height) / tileSize));
 
     const isWall = (x: number, y: number): boolean => {
         if (y < 0 || y >= MAP_HEIGHT || x < 0 || x >= MAP_WIDTH) {
@@ -98,22 +99,22 @@ const GameBoard: React.FC<GameBoardProps> = ({ map, visibilityMap, viewport, deb
             
             const tileImage = wallTileImages[index];
             if (tileImage?.complete) {
-                ctx.drawImage(tileImage, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                ctx.drawImage(tileImage, x * tileSize, y * tileSize, tileSize, tileSize);
             }
         } else {
-            ctx.drawImage(floorTileImage, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            ctx.drawImage(floorTileImage, x * tileSize, y * tileSize, tileSize, tileSize);
         }
         
         // Draw visibility overlay
         if (visibility === Visibility.EXPLORED) {
           ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-          ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+          ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
         }
 
         // Draw debug overlays
         if (debugOptions.showEnemyVision && enemyVisionTiles.has(`${x},${y}`)) {
           ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
-          ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+          ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
         }
       }
     }
@@ -126,20 +127,20 @@ const GameBoard: React.FC<GameBoardProps> = ({ map, visibilityMap, viewport, deb
           for (const pos of enemy.path) {
             if (pos.x >= startX && pos.x <= endX && pos.y >= startY && pos.y <= endY) {
                 ctx.beginPath();
-                ctx.arc(pos.x * TILE_SIZE + TILE_SIZE / 2, pos.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 4, 0, 2 * Math.PI);
+                ctx.arc(pos.x * tileSize + tileSize / 2, pos.y * tileSize + tileSize / 2, tileSize / 4, 0, 2 * Math.PI);
                 ctx.fill();
             }
           }
         }
       }
     }
-  }, [map, visibilityMap, viewport, debugOptions, enemies, enemyVisionTiles, imagesLoaded]);
+  }, [map, visibilityMap, viewport, debugOptions, enemies, enemyVisionTiles, imagesLoaded, tileSize]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={MAP_WIDTH * TILE_SIZE}
-      height={MAP_HEIGHT * TILE_SIZE}
+      width={MAP_WIDTH * tileSize}
+      height={MAP_HEIGHT * tileSize}
       className="absolute top-0 left-0"
       style={{ imageRendering: 'pixelated' }}
     />

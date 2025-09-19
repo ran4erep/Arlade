@@ -1,21 +1,21 @@
 import React from 'react';
 import { Position } from '../types';
-import { TILE_SIZE } from '../constants';
 import { PLAYER_SPRITE_BASE64 } from '../assets/actors';
 
 interface PlayerProps {
   pos: Position;
+  tileSize: number;
 }
 
-const PlayerComponent: React.FC<PlayerProps> = ({ pos }) => {
+const PlayerComponent: React.FC<PlayerProps> = ({ pos, tileSize }) => {
   return (
     <div
       className="absolute transition-all duration-150 ease-in-out"
       style={{
-        left: pos.x * TILE_SIZE,
-        top: pos.y * TILE_SIZE,
-        width: TILE_SIZE,
-        height: TILE_SIZE,
+        left: pos.x * tileSize,
+        top: pos.y * tileSize,
+        width: tileSize,
+        height: tileSize,
       }}
     >
       <img

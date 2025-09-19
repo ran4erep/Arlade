@@ -12,11 +12,11 @@ const LogPanel: React.FC<LogPanelProps> = ({ messages }) => {
   }, [messages]);
 
   return (
-    <div className="h-full flex flex-col p-4 text-xs bg-gray-800">
-      <h2 className="text-xl font-bold mb-4 pb-2 border-b border-gray-600 text-gray-300 flex-shrink-0">
+    <div className="h-full flex flex-col p-1 md:p-4 text-[6px] md:text-[10px] bg-gray-800">
+      <h2 className="text-sm md:text-lg font-bold mb-2 pb-2 border-b border-gray-600 text-gray-300 flex-shrink-0">
         Журнал
       </h2>
-      <div className="flex-grow overflow-y-auto pr-2">
+      <div className="flex-grow overflow-y-auto pr-1">
         {messages.map((msg, index) => {
           if (msg.startsWith('$$SEP$$')) {
             return (

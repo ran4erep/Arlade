@@ -1,4 +1,5 @@
-export const TILE_SIZE = 32; // in pixels
+export const PC_TILE_SIZE = 32; // in pixels
+export const MOBILE_TILE_SIZE = 16; // in pixels
 export const MAP_WIDTH = 64;
 export const MAP_HEIGHT = 64;
 

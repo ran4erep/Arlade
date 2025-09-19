@@ -1,11 +1,11 @@
 import React from 'react';
 import { Enemy, DebugOptions, EnemyState } from '../types';
-import { TILE_SIZE } from '../constants';
 import { ENEMY_SPRITE_BASE64 } from '../assets/actors';
 
 interface EnemyProps {
   enemy: Enemy;
   debugOptions: DebugOptions;
+  tileSize: number;
 }
 
 const stateMap: { [key in EnemyState]: string } = {
@@ -14,15 +14,15 @@ const stateMap: { [key in EnemyState]: string } = {
   [EnemyState.SEARCHING]: 'S',
 };
 
-const EnemyComponent: React.FC<EnemyProps> = ({ enemy, debugOptions }) => {
+const EnemyComponent: React.FC<EnemyProps> = ({ enemy, debugOptions, tileSize }) => {
   return (
     <div
       className="absolute transition-all duration-150 ease-in-out z-20"
       style={{
-        left: enemy.pos.x * TILE_SIZE,
-        top: enemy.pos.y * TILE_SIZE,
-        width: TILE_SIZE,
-        height: TILE_SIZE,
+        left: enemy.pos.x * tileSize,
+        top: enemy.pos.y * tileSize,
+        width: tileSize,
+        height: tileSize,
       }}
     >
        <img
