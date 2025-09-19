@@ -14,6 +14,22 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
     imageRendering: 'pixelated',
   };
 
+  // Define dynamic styles using clamp for fluid scaling based on viewport size
+  const titleStyle: React.CSSProperties = {
+    fontSize: 'clamp(1rem, 4vw, 3rem)',
+    textShadow: '3px 3px 0px #000',
+  };
+
+  const subtitleStyle: React.CSSProperties = {
+    fontSize: 'clamp(0.75rem, 3vw, 1.5rem)',
+    textShadow: '2px 2px 0px #000',
+  };
+  
+  const buttonStyle: React.CSSProperties = {
+    fontSize: 'clamp(0.8rem, 2vw, 1.1rem)',
+    padding: 'clamp(0.5rem, 1.5vh, 0.8rem) clamp(1rem, 3vw, 1.75rem)',
+  };
+
   return (
     <div
       className="relative flex flex-col h-full text-white"
@@ -21,27 +37,36 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartGame }) => {
     >
       <div className="absolute inset-0 bg-black bg-opacity-40 z-0"></div>
       
-      <div className="relative z-10 flex flex-col flex-grow justify-between p-4 sm:p-8 md:p-12 lg:p-16">
+      {/* Adjusted padding for smaller screens */}
+      <div className="relative z-10 flex flex-col flex-grow justify-between p-4 md:p-8 lg:p-16">
         {/* Top-left aligned title */}
         <div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-1 sm:mb-2 text-yellow-300" style={{ textShadow: '3px 3px 0px #000' }}>
+            <h1 
+              className="mb-1 sm:mb-2 text-yellow-300" 
+              style={titleStyle}
+            >
               Arlade
             </h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300" style={{ textShadow: '2px 2px 0px #000' }}>
+            <p 
+              className="text-gray-300" 
+              style={subtitleStyle}
+            >
                 A roguelike adventure
             </p>
         </div>
 
-        {/* Centered buttons */}
+        {/* Centered buttons with dynamic sizing */}
         <div className="flex flex-col items-center space-y-2 sm:space-y-4">
           <button
             onClick={onStartGame}
-            className="px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base md:px-8 md:py-4 md:text-xl bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-transform transform hover:scale-105 shadow-lg border-2 border-blue-400"
+            className="bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition-transform transform hover:scale-105 shadow-lg border-2 border-blue-400"
+            style={buttonStyle}
           >
             Начать новую игру
           </button>
           <button
-            className="px-4 py-2 text-sm sm:px-6 sm:py-3 sm:text-base md:px-8 md:py-4 md:text-xl bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-transform transform hover:scale-105 shadow-lg cursor-not-allowed opacity-75 border-2 border-gray-500"
+            className="bg-gray-700 hover:bg-gray-600 rounded-lg font-semibold transition-transform transform hover:scale-105 shadow-lg cursor-not-allowed opacity-75 border-2 border-gray-500"
+            style={buttonStyle}
             disabled
           >
             Настройки
