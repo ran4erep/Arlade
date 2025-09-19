@@ -52,7 +52,41 @@ const App: React.FC = () => {
     };
   }, [isTouchDevice]);
 
+  const enterFullScreen = useCallback(() => {
+    const element = document.documentElement as HTMLElement & {
+      mozRequestFullScreen?: () => Promise<void>;
+      webkitRequestFullscreen?: () => Promise<void>;
+      msRequestFullscreen?: () => Promise<void>;
+    };
+
+    const doc = document as Document & {
+      mozFullScreenElement?: Element;
+      webkitFullscreenElement?: Element;
+      msFullscreenElement?: Element;
+    };
+
+    if (
+      !doc.fullscreenElement &&
+      !doc.webkitFullscreenElement &&
+      !doc.mozFullScreenElement &&
+      !doc.msFullscreenElement
+    ) {
+      if (element.requestFullscreen) {
+        element.requestFullscreen().catch(err => {
+            console.warn(`Fullscreen request failed: ${err.message}`);
+        });
+      } else if (element.mozRequestFullScreen) { // Firefox
+        element.mozRequestFullScreen();
+      } else if (element.webkitRequestFullscreen) { // Chrome, Safari & Opera
+        element.webkitRequestFullscreen();
+      } else if (element.msRequestFullscreen) { // IE/Edge
+        element.msRequestFullscreen();
+      }
+    }
+  }, []);
+
   const startGame = useCallback(async () => {
+    enterFullScreen();
     setGameState('loading');
     setLoadingProgress({ progress: 0, message: 'Начало генерации...' });
     
@@ -64,7 +98,7 @@ const App: React.FC = () => {
             setGameState('playing');
         }
     }
-  }, []);
+  }, [enterFullScreen]);
 
   const endGame = useCallback(() => {
     setGameState('gameOver');

@@ -13,7 +13,7 @@ const LogPanel: React.FC<LogPanelProps> = ({ messages }) => {
 
   return (
     <div className="h-full flex flex-col p-1 md:p-4 text-[6px] md:text-[10px] bg-gray-800">
-      <h2 className="text-sm md:text-lg font-bold mb-2 pb-2 border-b border-gray-600 text-gray-300 flex-shrink-0">
+      <h2 className="text-xs md:text-lg font-bold mb-2 pb-2 border-b border-gray-600 text-gray-300 flex-shrink-0">
         Журнал
       </h2>
       <div className="flex-grow overflow-y-auto pr-1">
@@ -26,7 +26,7 @@ const LogPanel: React.FC<LogPanelProps> = ({ messages }) => {
             );
           }
           return (
-            <p key={index} className={`mb-1 ${index === messages.length - 1 ? 'text-yellow-300 animate-pulse' : 'text-gray-400'}`}>
+            <p key={index} className={`mb-1 break-words ${index === messages.length - 1 ? 'text-yellow-300 animate-pulse' : 'text-gray-400'}`}>
               &gt; {msg}
             </p>
           );

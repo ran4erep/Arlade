@@ -378,7 +378,7 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
         <main className="flex flex-row flex-grow overflow-hidden min-h-0">
             <div 
               ref={gameAreaRef} 
-              className="flex-grow relative overflow-hidden bg-black"
+              className="basis-3/4 md:basis-auto md:flex-grow relative overflow-hidden bg-black"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               style={{ touchAction: 'none' }}
@@ -425,7 +425,7 @@ const Game: React.FC<GameProps> = ({ onGameOver, dungeonData }) => {
                     ))}
                 </div>
             </div>
-            <aside className="w-40 md:w-96 h-full flex-shrink-0 bg-gray-800 border-l-2 border-gray-600">
+            <aside className="basis-1/4 md:basis-96 h-full flex-shrink-0 bg-gray-800 border-l-2 border-gray-600">
                 <LogPanel messages={log} />
             </aside>
         </main>
